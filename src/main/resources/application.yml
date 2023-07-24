@@ -1,0 +1,31 @@
+external:
+  percentage:
+    url: http://localhost:3100/api/percentage
+
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6380
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5437/postgres
+    username: postgres
+    password: postgres
+
+cache:
+  clear:
+    rate: 1800000
+
+
+
+logging:
+    level:
+      org:
+        springframework:
+          cache: TRACE
+      reactor:
+          netty:
+            http:
+              client:
+                HttpClient: DEBUG

@@ -1,0 +1,10 @@
+[
+  {
+    "httpRequest": {
+      "path": "/random-int"
+    },
+    "httpResponse": {
+      "body": "${RANDOM_INT}"
+    }
+  }
+]

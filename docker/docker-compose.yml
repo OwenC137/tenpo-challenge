@@ -1,0 +1,30 @@
+name: tenpo
+services:
+  # postgresql
+    postgresql:
+        image: postgres:9.6
+#        container_name: postgresql
+        restart: always
+        ports:
+        - "5437:5432"
+        environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+        - POSTGRES_DB=postgres
+        volumes:
+        - ./postgresql/data:/var/lib/postgresql/data
+    #redis
+    redis:
+        image: redis:5.0.5
+        restart: always
+        ports:
+        - "6380:6379"
+
+    #mockserver
+    mockserver:
+        image: mocksserver/main
+        ports:
+            - 3110:3110
+            - 3100:3100
+        volumes:
+            - ./mockserver:/input
