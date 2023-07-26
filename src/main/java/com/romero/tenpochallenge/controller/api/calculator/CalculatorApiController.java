@@ -1,48 +1,34 @@
 package com.romero.tenpochallenge.controller.api.calculator;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.romero.tenpochallenge.error.AppException;
+import com.romero.tenpochallenge.model.SumAndAddPercentageRequest;
 import com.romero.tenpochallenge.usecase.calculator.operation.SumAndAddPercentageOperation;
 import com.romero.tenpochallenge.usecase.calculator.operation.SumAndAddPercentageUseCase;
-import com.romero.tenpochallenge.usecase.calculator.percentage.GetPercentageUseCase;
-import com.romero.tenpochallenge.usecase.calculator.percentage.Percentage;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
-
-import java.math.BigDecimal;
-import java.time.Duration;
+import reactor.util.retry.Retry;
 
 @RestController
 @RequestMapping("/api/calculator")
 public class CalculatorApiController {
 
     private final SumAndAddPercentageUseCase sumAndAddPercentageUseCase;
-    private final GetPercentageUseCase getPercentageUseCase;
 
-    CalculatorApiController(@Autowired SumAndAddPercentageUseCase sumAndAddPercentageUseCase,
-                            @Autowired GetPercentageUseCase getPercentageUseCase) {
+    CalculatorApiController(@Autowired final SumAndAddPercentageUseCase sumAndAddPercentageUseCase) {
         this.sumAndAddPercentageUseCase = sumAndAddPercentageUseCase;
-        this.getPercentageUseCase = getPercentageUseCase;
     }
 
-    @GetMapping("/sum-and-apply-percentage")
-    public Mono<SumAndAddPercentageOperation> sumAndApplyPercentage() {
-        return this.sumAndAddPercentageUseCase.execute(
-                Pair.of(BigDecimal.ONE, BigDecimal.TEN)
-        );
-    }
-
-    @GetMapping("/test")
-    public Mono<Percentage> test(){
-        return this.getPercentageUseCase.execute();
+    @PostMapping("/sum-and-apply-percentage")
+    public Mono<SumAndAddPercentageOperation> sumAndApplyPercentage(@Valid @RequestBody final SumAndAddPercentageRequest request) {
+        return this.sumAndAddPercentageUseCase.execute(Pair.of(request.getFirstNumber(), request.getSecondNumber()))
+                .retryWhen(Retry.backoff(3, java.time.Duration.ofMillis(100)).filter(throwable ->
+                        !(throwable instanceof AppException)
+                ));
     }
 }

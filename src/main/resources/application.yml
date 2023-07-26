@@ -14,18 +14,21 @@ spring:
     password: postgres
 
 cache:
-  clear:
-    rate: 1800000
-
-
+  ttl:
+    # expressed in minutes
+    percentage: 30
 
 logging:
-    level:
-      org:
-        springframework:
-          cache: TRACE
-      reactor:
-          netty:
-            http:
-              client:
-                HttpClient: DEBUG
+  level:
+    org:
+      springframework:
+        cache: TRACE
+    reactor:
+      netty:
+        http:
+          client:
+            HttpClient: DEBUG
+
+rate:
+  limit:
+    perMinute: 3
