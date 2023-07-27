@@ -27,9 +27,10 @@ public class GetPercentageUseCase implements UseCase<Mono<Percentage>> {
 
     @Override
     public Mono<Percentage> execute() {
-        return this.reactiveCachePercentage.getPercentageOrDefaultAndSave(
-                this.getPercentageFromWebClient()
-        );
+        return this.reactiveCachePercentage.getPercentage()
+                .switchIfEmpty(
+                        this.getPercentageFromWebClient().flatMap(this.reactiveCachePercentage::setPercentage)
+                );
     }
 
     private Mono<Percentage> getPercentageFromWebClient() {

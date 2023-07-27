@@ -27,13 +27,12 @@ public class ReactiveCachePercentage {
         this.ttl = ttl;
     }
 
-    public Mono<Percentage> getPercentageOrDefaultAndSave(final Mono<Percentage> defaultValue) {
-        return this.reactiveValueOps.get(PERCENTAGE_CACHE_KEY)
-                .switchIfEmpty(defaultValue.doOnNext(this::save));
+    public Mono<Percentage> getPercentage() {
+        return this.reactiveValueOps.get(PERCENTAGE_CACHE_KEY);
     }
 
-    private void save(final Percentage percentage) {
-        this.reactiveValueOps.set(PERCENTAGE_CACHE_KEY, percentage, Duration.ofMinutes(this.ttl)).subscribe();
+    public Mono<Percentage> setPercentage(final Percentage percentage) {
+        return this.reactiveValueOps.set(PERCENTAGE_CACHE_KEY, percentage, Duration.ofMinutes(this.ttl)).map(__ -> percentage);
     }
 
 }

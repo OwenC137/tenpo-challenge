@@ -3,7 +3,19 @@ external:
     url: http://localhost:3100/api/percentage
 
 spring:
+
+  flyway:
+    url: jdbc:postgresql://localhost:5437/postgres
+    locations: classpath:db/postgres/migration
+
   data:
+    postgres:
+      host: localhost
+      port: 5437
+      username: postgres
+      password: postgres
+      database: postgres
+
     redis:
       host: localhost
       port: 6380

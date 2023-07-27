@@ -4,6 +4,7 @@ import com.romero.tenpochallenge.error.AppException;
 import com.romero.tenpochallenge.model.SumAndAddPercentageRequest;
 import com.romero.tenpochallenge.usecase.calculator.operation.SumAndAddPercentageOperation;
 import com.romero.tenpochallenge.usecase.calculator.operation.SumAndAddPercentageUseCase;
+import com.romero.tenpochallenge.usecase.request.SaveRequestUseCase;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -19,9 +20,12 @@ import reactor.util.retry.Retry;
 public class CalculatorApiController {
 
     private final SumAndAddPercentageUseCase sumAndAddPercentageUseCase;
+    private final SaveRequestUseCase saveRequestUseCase;
 
-    CalculatorApiController(@Autowired final SumAndAddPercentageUseCase sumAndAddPercentageUseCase) {
+    CalculatorApiController(@Autowired final SumAndAddPercentageUseCase sumAndAddPercentageUseCase,
+                            @Autowired final SaveRequestUseCase saveRequestUseCase) {
         this.sumAndAddPercentageUseCase = sumAndAddPercentageUseCase;
+        this.saveRequestUseCase = saveRequestUseCase;
     }
 
     @PostMapping("/sum-and-apply-percentage")
@@ -29,6 +33,7 @@ public class CalculatorApiController {
         return this.sumAndAddPercentageUseCase.execute(Pair.of(request.getFirstNumber(), request.getSecondNumber()))
                 .retryWhen(Retry.backoff(3, java.time.Duration.ofMillis(100)).filter(throwable ->
                         !(throwable instanceof AppException)
-                ));
+                )).doOnSuccess(sumAndAddPercentageOperation ->
+                        this.saveRequestUseCase.execute(Pair.of(request, sumAndAddPercentageOperation)));
     }
 }
