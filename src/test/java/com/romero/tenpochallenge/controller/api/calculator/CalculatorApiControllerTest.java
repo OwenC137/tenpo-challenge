@@ -4,6 +4,7 @@ import com.romero.tenpochallenge.config.RateLimiterFilter;
 import com.romero.tenpochallenge.model.SumAndAddPercentageRequest;
 import com.romero.tenpochallenge.usecase.calculator.operation.SumAndAddPercentageOperation;
 import com.romero.tenpochallenge.usecase.calculator.operation.SumAndAddPercentageUseCase;
+import com.romero.tenpochallenge.usecase.request.SaveRequestUseCase;
 import io.github.bucket4j.local.LockFreeBucket;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,20 +24,24 @@ import java.time.Duration;
 
 @RunWith(SpringRunner.class)
 @WebFluxTest(CalculatorApiController.class)
-@MockBean(classes = {SumAndAddPercentageUseCase.class})
+@MockBean(classes = {SumAndAddPercentageUseCase.class, SaveRequestUseCase.class})
 public class CalculatorApiControllerTest {
 
     private final WebTestClient webTestClient;
     private final SumAndAddPercentageUseCase sumAndAddPercentageUseCase;
+
+    private final SaveRequestUseCase saveRequestUseCase;
     private final RateLimiterFilter rateLimiterFilter;
 
     CalculatorApiControllerTest(
             @Autowired final WebTestClient webTestClient,
             @Autowired final SumAndAddPercentageUseCase sumAndAddPercentageUseCase,
-            @Autowired final RateLimiterFilter rateLimiterFilter
+            @Autowired final RateLimiterFilter rateLimiterFilter,
+            @Autowired final SaveRequestUseCase saveRequestUseCase
     ) {
         this.webTestClient = webTestClient;
         this.sumAndAddPercentageUseCase = sumAndAddPercentageUseCase;
+        this.saveRequestUseCase = saveRequestUseCase;
         this.rateLimiterFilter = rateLimiterFilter;
     }
 
@@ -59,6 +64,9 @@ public class CalculatorApiControllerTest {
                                 .build()
                 ));
 
+        Mockito.when(this.saveRequestUseCase.execute(Mockito.any()))
+                .thenReturn(Mono.empty());
+
         this.webTestClient.post()
                 .uri("/api/calculator/sum-and-apply-percentage")
                 .body(Mono.just(
@@ -79,6 +87,9 @@ public class CalculatorApiControllerTest {
     public void when_use_case_retry_exceed_times_then_it_must_fail() {
         Mockito.when(this.sumAndAddPercentageUseCase.execute(Mockito.any()))
                 .thenReturn(Mono.error(new RuntimeException("Error")));
+
+        Mockito.when(this.saveRequestUseCase.execute(Mockito.any()))
+                .thenReturn(Mono.empty());
 
         this.webTestClient.mutate().responseTimeout(Duration.ofSeconds(60)).build().post()
                 .uri("/api/calculator/sum-and-apply-percentage")
@@ -103,20 +114,9 @@ public class CalculatorApiControllerTest {
                                         .build()
                         )
                 );
-        this.webTestClient.post()
-                .uri("/api/calculator/sum-and-apply-percentage")
-                .body(Mono.just(
-                        SumAndAddPercentageRequest.builder()
-                                .firstNumber(BigDecimal.valueOf(50))
-                                .secondNumber(BigDecimal.valueOf(50))
-                                .build()
-                ), SumAndAddPercentageRequest.class)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.sum").isEqualTo(100)
-                .jsonPath("$.percentage").isEqualTo(10)
-                .jsonPath("$.result").isEqualTo(110);
+
+        Mockito.when(this.saveRequestUseCase.execute(Mockito.any()))
+                .thenReturn(Mono.empty());
 
         this.webTestClient.post()
                 .uri("/api/calculator/sum-and-apply-percentage")
@@ -148,7 +148,21 @@ public class CalculatorApiControllerTest {
                 .jsonPath("$.percentage").isEqualTo(10)
                 .jsonPath("$.result").isEqualTo(110);
 
-//        now must fail for exceed the limit
+        this.webTestClient.post()
+                .uri("/api/calculator/sum-and-apply-percentage")
+                .body(Mono.just(
+                        SumAndAddPercentageRequest.builder()
+                                .firstNumber(BigDecimal.valueOf(50))
+                                .secondNumber(BigDecimal.valueOf(50))
+                                .build()
+                ), SumAndAddPercentageRequest.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.sum").isEqualTo(100)
+                .jsonPath("$.percentage").isEqualTo(10)
+                .jsonPath("$.result").isEqualTo(110);
+
         this.webTestClient.post()
                 .uri("/api/calculator/sum-and-apply-percentage")
                 .body(Mono.just(

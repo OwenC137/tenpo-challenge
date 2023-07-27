@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
+import static reactor.core.scheduler.Schedulers.boundedElastic;
+
 @RestController
 @RequestMapping("/api/calculator")
 public class CalculatorApiController {
@@ -34,6 +36,9 @@ public class CalculatorApiController {
                 .retryWhen(Retry.backoff(3, java.time.Duration.ofMillis(100)).filter(throwable ->
                         !(throwable instanceof AppException)
                 )).doOnSuccess(sumAndAddPercentageOperation ->
-                        this.saveRequestUseCase.execute(Pair.of(request, sumAndAddPercentageOperation)));
+                        this.saveRequestUseCase.execute(Pair.of(request, sumAndAddPercentageOperation)).subscribeOn(
+                                boundedElastic()
+                        ).subscribe()
+                );
     }
 }

@@ -1,7 +1,9 @@
 package com.romero.tenpochallenge.usecase.request;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.romero.tenpochallenge.data.repository.HttpRequestDataRepository;
+import com.romero.tenpochallenge.data.model.RequestData;
+import com.romero.tenpochallenge.data.repository.RequestDataRepository;
 import com.romero.tenpochallenge.model.SumAndAddPercentageRequest;
 import com.romero.tenpochallenge.usecase.UseCaseWithParameters;
 import com.romero.tenpochallenge.usecase.calculator.operation.SumAndAddPercentageOperation;
@@ -11,23 +13,34 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 @Slf4j
 @Component
 public class SaveRequestUseCase implements UseCaseWithParameters<Pair<SumAndAddPercentageRequest,
-        SumAndAddPercentageOperation>, Mono<Void>> {
-    private final HttpRequestDataRepository httpRequestDataRepository;
+        SumAndAddPercentageOperation>, Mono<RequestData>> {
+    private final RequestDataRepository requestDataRepository;
     private final ObjectMapper objectMapper;
 
     public SaveRequestUseCase(
-            @Autowired final HttpRequestDataRepository httpRequestDataRepository,
+            @Autowired final RequestDataRepository requestDataRepository,
             @Autowired final ObjectMapper objectMapper) {
-        this.httpRequestDataRepository = httpRequestDataRepository;
+        this.requestDataRepository = requestDataRepository;
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public Mono<Void> execute(final Pair<SumAndAddPercentageRequest, SumAndAddPercentageOperation> parameter) {
+    public Mono<RequestData> execute(final Pair<SumAndAddPercentageRequest, SumAndAddPercentageOperation> parameter) {
         log.info("Saving request");
-        return Mono.empty();
+        try {
+            return this.requestDataRepository.save(RequestData.builder()
+                    .body(this.objectMapper.writeValueAsString(parameter.getFirst()))
+                    .response(this.objectMapper.writeValueAsString(parameter.getSecond()))
+                    .date(LocalDateTime.now())
+                    .build());
+        } catch (final JsonProcessingException e) {
+            log.error("Error saving request", e);
+            return Mono.empty();
+        }
     }
 }
