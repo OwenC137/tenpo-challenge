@@ -43,4 +43,5 @@ logging:
 
 rate:
   limit:
-    perMinute: 3
+    unit: MINUTES
+    amount: 3

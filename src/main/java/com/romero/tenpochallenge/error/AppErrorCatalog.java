@@ -9,6 +9,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public enum AppErrorCatalog {
+    UNABLE_TO_READ_REQUEST_DATA("UNABLE_TO_READ_REQUEST_DATA", "Unable to read request data", HttpStatus.INTERNAL_SERVER_ERROR),
     BAD_REQUEST("BAD_REQUEST", "Bad Request", HttpStatus.BAD_REQUEST),
     RATE_LIMIT_EXCEEDED("RATE_LIMIT_EXCEEDED", "You have exhausted your API Request Quota", HttpStatus.TOO_MANY_REQUESTS),
     RETRY_EXHAUSTED("RETRY_EXHAUSTED", "Retry Exhausted", HttpStatus.INTERNAL_SERVER_ERROR),

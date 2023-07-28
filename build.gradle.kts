@@ -34,8 +34,6 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok:1.18.28")
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
     implementation("io.lettuce:lettuce-core")
-    implementation("com.github.ben-manes.caffeine:caffeine:3.0.4")
-    implementation("com.bucket4j:bucket4j-core:8.3.0")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 }
 
