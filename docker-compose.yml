@@ -1,0 +1,49 @@
+name: tenpo
+services:
+
+  #java app, spring boot, it has his own dockerfile and dependencies with other services
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PERCENTAGE_API_URL=http://mockserver:3100/api/percentage
+      - FLYWAY_DATABASE_URL=jdbc:postgresql://postgresql:5432/postgres
+      - CACHE_HOST=redis
+      - CACHE_PORT=6379
+      - DATABASE_URL=r2dbc:postgresql://postgresql:5432/postgres
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgresql
+      - redis
+      - mockserver
+
+
+  postgresql:
+    image: postgres:15-alpine
+    #        container_name: postgresql
+    restart: always
+    ports:
+      - "5437:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./docker/postgresql/data:/var/lib/postgresql/data
+  redis:
+    image: redis:5.0.5
+    restart: always
+    ports:
+      - "6380:6379"
+
+  mockserver:
+    image: mocksserver/main
+    ports:
+      - 3110:3110
+      - 3100:3100
+    volumes:
+      - ./docker/mockserver:/input

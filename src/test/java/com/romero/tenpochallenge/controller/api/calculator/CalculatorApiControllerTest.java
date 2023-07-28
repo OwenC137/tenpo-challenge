@@ -74,7 +74,7 @@ public class CalculatorApiControllerTest {
                 .thenReturn(Mono.empty());
 
         this.webTestClient.post()
-                .uri("/api/calculator/sum-and-apply-percentage")
+                .uri("/api/v1/calculator/sum-and-apply-percentage")
                 .body(Mono.just(
                         SumAndAddPercentageRequest.builder()
                                 .firstNumber(BigDecimal.valueOf(50))

@@ -1,33 +1,25 @@
 external:
   percentage:
-    url: http://localhost:3100/api/percentage
+    url: ${PERCENTAGE_API_URL:http://localhost:3100/api/percentage}
 
 spring:
 
   flyway:
-    url: jdbc:postgresql://localhost:5437/postgres?sslmode=disable
+    url: ${FLYWAY_DATABASE_URL:jdbc:postgresql://localhost:5437/postgres}
     locations: classpath:db/postgres/migration
 
   data:
-    postgres:
-      host: localhost
-      port: 5437
-      username: postgres
-      password: postgres
-      database: postgres
-
     redis:
-      host: localhost
-      port: 6380
+      host: ${CACHE_HOST:localhost}
+      port: ${CACHE_PORT:6380}
 
   r2dbc:
-    url: r2dbc:postgresql://localhost:5437/postgres?sslmode=disable
-    username: postgres
-    password: postgres
+    url: ${DATABASE_URL:r2dbc:postgresql://localhost:5437/postgres}
+    username: ${DATABASE_USER:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
 
 cache:
   ttl:
-    # expressed in minutes
     percentage: 30
 
 logging:
@@ -45,9 +37,6 @@ rate:
   limit:
     unit: MINUTES
     amount: 3
-
-#springdoc.swagger-ui.path=/swagger-doc/swagger-ui.html
-#springdoc.api-docs.path=/swagger-doc/v3/api-docs
 
 springdoc:
   swagger-ui:

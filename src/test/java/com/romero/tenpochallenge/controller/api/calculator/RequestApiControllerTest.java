@@ -73,7 +73,7 @@ public class RequestApiControllerTest {
                 .thenReturn(Mono.just(page));
 
         this.webTestClient.get()
-                .uri("/api/request-history")
+                .uri("/api/v1/request-history")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
