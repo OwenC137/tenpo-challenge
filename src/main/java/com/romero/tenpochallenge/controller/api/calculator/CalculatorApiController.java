@@ -18,7 +18,7 @@ import reactor.util.retry.Retry;
 import static reactor.core.scheduler.Schedulers.boundedElastic;
 
 @RestController
-@RequestMapping("/api/calculator")
+@RequestMapping("/api/v1/calculator")
 public class CalculatorApiController {
 
     private final SumAndAddPercentageUseCase sumAndAddPercentageUseCase;

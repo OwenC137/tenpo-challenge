@@ -37,8 +37,9 @@ public class AppGlobalErrorHandler extends AbstractErrorWebExceptionHandler {
 
     @Override
     protected RouterFunction<ServerResponse> getRoutingFunction(final ErrorAttributes errorAttributes) {
-        return RouterFunctions.route(RequestPredicates.all(), this::renderErrorResponse);
+        return RouterFunctions.route(RequestPredicates.path("/api/**"), this::renderErrorResponse);
     }
+
 
     private Mono<ServerResponse> renderErrorResponse(final ServerRequest request) {
 

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/api/request-history")
+@RequestMapping("/api/v1/request-history")
 public class RequestApiController {
 
     private final GetRequestsUseCase getRequestsUseCase;

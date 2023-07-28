@@ -34,6 +34,11 @@ public class RateLimiterFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(final ServerWebExchange exchange, final WebFilterChain chain) {
+
+        if (!exchange.getRequest().getURI().getPath().contains("/api")) {
+            return chain.filter(exchange);
+        }
+
         return this.reactiveCacheRateLimit.getLimit().defaultIfEmpty(this.defaultRateLimit())
                 .flatMap(rateLimit -> {
 
